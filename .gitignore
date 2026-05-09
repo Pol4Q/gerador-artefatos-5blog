@@ -9,3 +9,12 @@ env/
 
 # Ignorar os DFDs gerados nos testes, mas manter a pasta de templates
 DFD_*.docx
+
+# Banco de dados local
+*.db
+*.sqlite3
+banco_5blog.db
+
+# Ignorar o diretório virtual caso decida criar um
+venv/
+env/

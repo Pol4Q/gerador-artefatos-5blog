@@ -240,12 +240,33 @@ class MainWindow(ctk.CTk):
         nome_arquivo = f"DFD_{objeto_limpo}_{hoje.strftime('%Hh%M%S')}.docx"
         
         try:
-            from app.controller.documento_controller import gerar_dfd
-            gerar_dfd(dados, nome_arquivo)
-            self.btn_gerar.configure(text="DOCUMENTO GERADO!", fg_color="#155724")
-            self.lista_itens_dfd = []
+            # 1. IMPORTAÇÃO E SALVAMENTO NO BANCO DE DADOS
+            from app.model.database import salvar_demanda_bd
+            
+            # Chama a função de INSERT enviando os dados da interface
+            id_salvo = salvar_demanda_bd(
+                uasg="160213", # UASG DO 5º B LOG
+                setor=dados["setor"],
+                objeto=dados["objeto"],
+                justificativa=dados["justificativa"],
+                lista_itens=dados["itens"]
+            )
+
+            # 2. GERAÇÃO DO ARQUIVO DOCX
+            if id_salvo:
+                from app.controller.documento_controller import gerar_dfd
+                gerar_dfd(dados, nome_arquivo)
+                
+                # Feedback de sucesso para o usuário
+                self.btn_gerar.configure(text="SALVO NO BANCO E DOC GERADO!", fg_color="#155724")
+                
+                # Limpa a lista de itens da memória após salvar
+                self.lista_itens_dfd = []
+            else:
+                print("Operação abortada: Falha ao salvar no banco de dados.")
+
         except Exception as e:
-            print(f"Erro: {e}")
+            print(f"Erro Crítico na geração: {e}")
 
     def iniciar(self):
         self.mainloop()
